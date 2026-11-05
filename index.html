@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUPERVISI GURU</title>
+<style>
+:root{--ink:#1c2b3a;--paper:#f5f6f2;--card:#fff;--line:#d9ddd3;--accent:#1f5f5b;--accent2:#e3a72f;--mute:#6b7683;--bad:#b3392f}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "Segoe UI",system-ui,sans-serif;background:var(--paper);color:var(--ink)}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;margin:0 0 .6em}
+h2{font-size:1.4rem}h3{font-size:1.05rem}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px;padding:.55em 1em;background:var(--accent);color:#fff}
+button.sec{background:#e6e9e2;color:var(--ink)}button.del{background:var(--bad)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent2);outline-offset:1px}
+input,select,textarea{font:inherit;width:100%;padding:.5em .6em;border:1px solid var(--line);border-radius:6px;background:#fff}
+label{display:block;font-size:.85rem;color:var(--mute);margin:.7em 0 .2em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:1.2rem;margin-bottom:1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 1rem}
+.wide{grid-column:1/-1}
+.hide{display:none!important}
+#login{min-height:100vh;display:grid;place-items:center;background:var(--ink);padding:1rem}
+#login .box{background:#fff;width:100%;max-width:380px;border-radius:10px;padding:2rem;border-top:6px solid var(--accent2)}
+#login h1{font-size:1.8rem;letter-spacing:.02em}
+.top{background:var(--ink);color:#fff;padding:.8rem 1.2rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.top img{height:38px;border-radius:4px;background:#fff}
+.top b{font-family:Georgia,serif;font-size:1.15rem;margin-right:auto}
+nav{display:flex;gap:.3rem;flex-wrap:wrap;padding:.6rem 1.2rem;background:#e9ebe4;border-bottom:1px solid var(--line)}
+nav button{background:transparent;color:var(--ink)}nav button.on{background:var(--accent);color:#fff}
+main{max-width:1000px;margin:1.2rem auto;padding:0 1rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:.5em;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:#eef0ea}
+.tw{overflow-x:auto}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
+.chk{display:flex;flex-wrap:wrap;gap:.3rem .9rem}.chk label{display:flex;gap:.3rem;align-items:center;margin:0;color:var(--ink)}
+.chk input{width:auto}
+.sc{display:flex;gap:.8rem}.sc label{display:flex;gap:.2rem;align-items:center;margin:0;color:var(--ink)}.sc input{width:auto}
+.tot{position:sticky;bottom:0;background:var(--ink);color:#fff;padding:.7rem 1rem;border-radius:8px;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.tot b{color:var(--accent2);font-size:1.2rem}
+.msg{padding:.6rem .9rem;border-radius:6px;background:#e5f1ee;margin-bottom:1rem}
+.msg.err{background:#f8e3e0;color:var(--bad)}
+.note{font-size:.8rem;color:var(--mute)}
+#cetak{display:none}
+@media print{body{background:#fff}.app,#login{display:none!important}#cetak{display:block;padding:0}}
+.kop{display:flex;gap:1rem;align-items:center;border-bottom:3px double #000;padding-bottom:.6rem;margin-bottom:1rem}
+.kop img{height:70px}.kop div{text-align:center;flex:1}
+.ttd{display:flex;justify-content:space-between;margin-top:2.5rem}.ttd div{text-align:center;width:45%}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <form class="box" id="fl">
+    <h1>SUPERVISI GURU</h1>
+    <p class="note">Masuk sebagai kepala sekolah untuk mengelola data dan supervisi.</p>
+    <div id="lmsg" class="msg err hide"></div>
+    <label for="u">Username</label><input id="u" autocomplete="username" required>
+    <label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required>
+    <div class="row"><button type="submit" id="bl">Masuk</button></div>
+    <p class="note" id="demo"></p>
+  </form>
+</div>
+
+<div class="app hide" id="app">
+  <div class="top"><img id="tlogo" alt="" class="hide"><b id="tname">SUPERVISI GURU</b><span id="tuser"></span><button class="sec" id="out">Keluar</button></div>
+  <nav id="nav">
+    <button data-t="sekolah" class="on">Data sekolah</button>
+    <button data-t="guru">Data guru</button>
+    <button data-t="mapel">Mata pelajaran</button>
+    <button data-t="sup">Supervisi baru</button>
+    <button data-t="riwayat">Riwayat dan cetak</button>
+  </nav>
+  <main>
+    <div id="info" class="msg hide"></div>
+
+    <section id="t-sekolah">
+      <div class="card"><h2>Data sekolah</h2>
+        <div class="grid">
+          <div><label>Jenjang</label><select id="s_jenjang"><option>SD</option><option>MI</option><option>SMP</option><option>MTs</option><option>SMA</option><option>MA</option><option>SMK</option></select></div>
+          <div><label>Nama sekolah</label><input id="s_nama"></div>
+          <div><label>NPSN</label><input id="s_npsn" inputmode="numeric"></div>
+          <div><label>Tahun ajaran</label><input id="s_ta" placeholder="2026/2027"></div>
+          <div><label>Semester</label><select id="s_semester"><option>Ganjil</option><option>Genap</option></select></div>
+          <div class="wide"><label>Alamat</label><textarea id="s_alamat" rows="2"></textarea></div>
+          <div><label>Nama kepala sekolah</label><input id="s_kepsek"></div>
+          <div><label>NIP kepala sekolah</label><input id="s_nipKepsek"></div>
+          <div class="wide"><label>Logo sekolah (otomatis diperkecil)</label><input type="file" id="s_logo" accept="image/*"><img id="s_prev" alt="Pratinjau logo" class="hide" style="height:70px;margin-top:.5rem"></div>
+        </div>
+        <div class="row"><button id="sv_sekolah">Simpan data sekolah</button></div>
+      </div>
+    </section>
+
+    <section id="t-guru" class="hide">
+      <div class="card"><h2 id="gh">Tambah guru</h2>
+        <div class="grid">
+          <div><label>Nama guru</label><input id="g_nama"></div>
+          <div><label>NIP</label><input id="g_nip" placeholder="Kosongkan bila tidak ada"></div>
+          <div class="wide"><label>Tugas mengajar</label>
+            <select id="g_tugas"><option>Guru Kelas</option><option>Guru Mapel</option><option>Guru Kelas Fase A</option><option>Guru Kelas Fase B</option><option>Guru Kelas Fase C</option></select></div>
+          <div class="wide" id="g_mw"><label>Mata pelajaran yang diampu</label><div class="chk" id="g_mapel"></div></div>
+        </div>
+        <div class="row"><button id="sv_guru">Simpan guru</button><button class="sec hide" id="cl_guru">Batal edit</button></div>
+      </div>
+      <div class="card"><h3>Daftar guru</h3><div class="tw"><table><thead><tr><th>Nama</th><th>NIP</th><th>Tugas</th><th>Mapel</th><th></th></tr></thead><tbody id="gb"></tbody></table></div></div>
+    </section>
+
+    <section id="t-mapel" class="hide">
+      <div class="card"><h2>Mata pelajaran</h2>
+        <div class="row"><input id="m_nama" placeholder="Nama mata pelajaran" style="max-width:320px"><button id="sv_mapel">Tambah</button></div>
+        <div class="tw"><table><thead><tr><th>Mata pelajaran</th><th></th></tr></thead><tbody id="mb"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="t-sup" class="hide">
+      <div class="card"><h2 id="sh">Supervisi baru</h2>
+        <div class="grid">
+          <div><label>Guru yang disupervisi</label><select id="v_guru"></select></div>
+          <div><label>Tanggal</label><input type="date" id="v_tanggal"></div>
+          <div><label>Kelas</label><input id="v_kelas" placeholder="mis. 4A atau X IPA 1"></div>
+          <div><label>Mata pelajaran</label><input id="v_mapel" list="dl_mapel"><datalist id="dl_mapel"></datalist></div>
+        </div>
+        <p class="note">Skala: 1 = Kurang, 2 = Cukup, 3 = Baik, 4 = Amat baik.</p>
+      </div>
+      <div id="instr"></div>
+      <div class="card"><div class="grid">
+        <div class="wide"><label>Catatan hasil supervisi</label><textarea id="v_catatan" rows="3"></textarea></div>
+        <div class="wide"><label>Rencana tindak lanjut dan pembinaan</label><textarea id="v_tindak" rows="3"></textarea></div></div></div>
+      <div class="tot"><span>Nilai: <b id="nilai">0</b> &nbsp; Predikat: <b id="pred">-</b></span><span><button id="sv_sup">Simpan supervisi</button> <button class="sec" id="cl_sup">Kosongkan</button></span></div>
+    </section>
+
+    <section id="t-riwayat" class="hide">
+      <div class="card"><h2>Riwayat supervisi</h2><div class="tw"><table><thead><tr><th>Tanggal</th><th>Guru</th><th>Kelas / mapel</th><th>Nilai</th><th>Predikat</th><th></th></tr></thead><tbody id="rb"></tbody></table></div></div>
+    </section>
+  </main>
+</div>
+
+<div id="cetak"></div>
+
+<script>
+// Tempel URL aplikasi web Google Apps Script (berakhiran /exec) di sini.
+// Jika dikosongkan, aplikasi berjalan mode DEMO (data tersimpan di browser saja).
+const API_URL = '';
+
+const INSTR = {
+  A: {t:'A. Perencanaan pembelajaran', q:[
+    'Capaian pembelajaran dan alur tujuan pembelajaran sesuai fase/kelas',
+    'Tujuan pembelajaran dirumuskan jelas dan terukur',
+    'Modul ajar/RPP memuat komponen yang lengkap',
+    'Langkah kegiatan runtut dan sesuai karakteristik peserta didik (diferensiasi)',
+    'Media dan sumber belajar relevan dengan materi',
+    'Rencana asesmen (diagnostik, formatif, sumatif) tersedia']},
+  B: {t:'B. Pelaksanaan pembelajaran (observasi kelas)', q:[
+    'Membuka pembelajaran: salam, apersepsi, penyampaian tujuan',
+    'Penguasaan materi ajar',
+    'Ketepatan model/strategi pembelajaran',
+    'Pemanfaatan media dan teknologi',
+    'Melibatkan peserta didik secara aktif (berpikir kritis, kolaborasi, komunikasi)',
+    'Pengelolaan kelas dan manajemen waktu',
+    'Penggunaan bahasa lisan dan tulis yang baik',
+    'Asesmen formatif selama pembelajaran',
+    'Menutup pembelajaran: simpulan, refleksi, tindak lanjut']},
+  C: {t:'C. Asesmen dan tindak lanjut', q:[
+    'Instrumen penilaian sesuai tujuan pembelajaran',
+    'Analisis hasil asesmen dilakukan',
+    'Umpan balik diberikan kepada peserta didik',
+    'Program remedial dan pengayaan dilaksanakan',
+    'Administrasi penilaian (daftar nilai, rapor) tertib']},
+  D: {t:'D. Administrasi dan profesionalisme guru', q:[
+    'Program tahunan dan program semester tersedia',
+    'Jurnal mengajar dan daftar hadir peserta didik terisi',
+    'Ketepatan waktu dan kedisiplinan',
+    'Refleksi diri dan pengembangan kompetensi berkelanjutan']}
+};
+let S = {sekolah:{}, guru:[], mapel:[], supervisi:[]}, auth = null, editG = null, editV = null, logo = '';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+/* ---------- Data layer: Google Sheets atau mode demo ---------- */
+async function api(body) {
+  if (!API_URL) return demo(body);
+  const r = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({...body, u:auth.u, p:auth.p})});
+  return r.json();
+}
+function demo(b) {
+  if (b.action === 'login') return b.u === 'kepsek' && b.p === 'kepsek123' ? {ok:true} : {ok:false, pesan:'Username atau password salah'};
+  let d; try { d = JSON.parse(localStorage.getItem('sg_demo')) } catch (e) {}
+  d = d || {sekolah:{}, guru:[], mapel:[], supervisi:[]};
+  if (b.action === 'load') return {ok:true, data:d};
+  if (b.action === 'save') { d[b.sheet.toLowerCase()] = b.sheet === 'Sekolah' ? b.rows[0] : b.rows; try { localStorage.setItem('sg_demo', JSON.stringify(d)) } catch (e) {} return {ok:true}; }
+}
+function info(t, err) { const e = $('info'); e.textContent = t; e.className = 'msg' + (err ? ' err' : ''); setTimeout(() => e.classList.add('hide'), 3500); window.scrollTo(0, 0); }
+async function save(sheet, rows) {
+  try { const r = await api({action:'save', sheet, rows}); if (!r.ok) throw new Error(r.pesan); return true; }
+  catch (e) { info('Gagal menyimpan: ' + e.message, true); return false; }
+}
+
+/* ---------- Login ---------- */
+if (!API_URL) $('demo').textContent = 'Mode demo: gunakan kepsek / kepsek123. Isi API_URL agar terhubung ke Google Sheets.';
+$('fl').onsubmit = async e => {
+  e.preventDefault(); $('bl').disabled = true; $('lmsg').classList.add('hide');
+  try {
+    auth = {u:$('u').value.trim(), p:$('p').value};
+    const r = await api({action:'login', u:auth.u, p:auth.p});
+    if (!r.ok) throw new Error(r.pesan);
+    const l = await api({action:'load'});
+    S = {sekolah:l.data.sekolah || {}, guru:l.data.guru || [], mapel:l.data.mapel || [], supervisi:l.data.supervisi || []};
+    $('login').classList.add('hide'); $('app').classList.remove('hide'); $('tuser').textContent = auth.u;
+    renderAll();
+  } catch (err) { $('lmsg').textContent = err.message || 'Tidak dapat terhubung ke server'; $('lmsg').classList.remove('hide'); auth = null; }
+  $('bl').disabled = false;
+};
+$('out').onclick = () => location.reload();
+$('nav').onclick = e => {
+  const t = e.target.dataset.t; if (!t) return;
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b === e.target));
+  ['sekolah','guru','mapel','sup','riwayat'].forEach(k => $('t-' + k).classList.toggle('hide', k !== t));
+};
+
+/* ---------- Data sekolah ---------- */
+const SF = ['jenjang','nama','npsn','alamat','ta','semester','kepsek','nipKepsek'];
+function renderSekolah() {
+  SF.forEach(k => { if (S.sekolah[k]) $('s_' + k).value = S.sekolah[k]; });
+  logo = S.sekolah.logo || '';
+  $('s_prev').src = logo; $('s_prev').classList.toggle('hide', !logo);
+  $('tlogo').src = logo; $('tlogo').classList.toggle('hide', !logo);
+  $('tname').textContent = S.sekolah.nama ? 'SUPERVISI GURU - ' + S.sekolah.nama : 'SUPERVISI GURU';
+}
+$('s_logo').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, 160 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+    c.width = img.width * k; c.height = img.height * k; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    logo = c.toDataURL('image/png'); if (logo.length > 45000) logo = c.toDataURL('image/jpeg', .8);
+    $('s_prev').src = logo; $('s_prev').classList.remove('hide');
+  };
+  img.src = URL.createObjectURL(f);
+};
+$('sv_sekolah').onclick = async () => {
+  const o = {}; SF.forEach(k => o[k] = $('s_' + k).value.trim()); o.logo = logo;
+  if (!o.nama) return info('Nama sekolah wajib diisi', true);
+  if (await save('Sekolah', [o])) { S.sekolah = o; renderSekolah(); info('Data sekolah tersimpan'); }
+};
+
+/* ---------- Data guru ---------- */
+function renderMapelChk(sel = []) {
+  $('g_mapel').innerHTML = S.mapel.length ? S.mapel.map(m => `<label><input type="checkbox" value="${esc(m.nama)}" ${sel.includes(m.nama) ? 'checked' : ''}>${esc(m.nama)}</label>`).join('') : '<span class="note">Tambahkan mata pelajaran lebih dulu di menu Mata pelajaran.</span>';
+}
+$('g_tugas').onchange = () => $('g_mw').classList.toggle('hide', $('g_tugas').value !== 'Guru Mapel');
+function renderGuru() {
+  $('gb').innerHTML = S.guru.map(g => `<tr><td>${esc(g.nama)}</td><td>${esc(g.nip) || '-'}</td><td>${esc(g.tugas)}</td><td>${esc(g.mapel) || '-'}</td><td><button class="sec" onclick="editGuru('${g.id}')">Edit</button> <button class="del" onclick="delGuru('${g.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan="5" class="note">Belum ada data guru.</td></tr>';
+  $('v_guru').innerHTML = '<option value="">Pilih guru</option>' + S.guru.map(g => `<option value="${g.id}">${esc(g.nama)}</option>`).join('');
+  resetGuru();
+}
+function resetGuru() { editG = null; $('gh').textContent = 'Tambah guru'; $('g_nama').value = $('g_nip').value = ''; $('g_tugas').value = 'Guru Kelas'; $('cl_guru').classList.add('hide'); renderMapelChk(); $('g_tugas').onchange(); }
+window.editGuru = id => {
+  const g = S.guru.find(x => x.id === id); editG = id; $('gh').textContent = 'Edit guru';
+  $('g_nama').value = g.nama; $('g_nip').value = g.nip; $('g_tugas').value = g.tugas;
+  renderMapelChk(g.mapel ? g.mapel.split('; ') : []); $('g_tugas').onchange(); $('cl_guru').classList.remove('hide'); window.scrollTo(0, 0);
+};
+window.delGuru = async id => { if (!confirm('Hapus guru ini?')) return; const n = S.guru.filter(g => g.id !== id); if (await save('Guru', n)) { S.guru = n; renderGuru(); } };
+$('cl_guru').onclick = resetGuru;
+$('sv_guru').onclick = async () => {
+  const nama = $('g_nama').value.trim(); if (!nama) return info('Nama guru wajib diisi', true);
+  const tugas = $('g_tugas').value;
+  const mapel = tugas === 'Guru Mapel' ? [...$('g_mapel').querySelectorAll('input:checked')].map(i => i.value).join('; ') : '';
+  const o = {id:editG || uid(), nama, nip:$('g_nip').value.trim(), tugas, mapel};
+  const n = editG ? S.guru.map(g => g.id === editG ? o : g) : [...S.guru, o];
+  if (await save('Guru', n)) { S.guru = n; renderGuru(); info('Data guru tersimpan'); }
+};
+
+/* ---------- Mata pelajaran ---------- */
+function renderMapel() {
+  $('mb').innerHTML = S.mapel.map(m => `<tr><td>${esc(m.nama)}</td><td><button class="del" onclick="delMapel('${m.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan="2" class="note">Belum ada mata pelajaran.</td></tr>';
+  $('dl_mapel').innerHTML = S.mapel.map(m => `<option value="${esc(m.nama)}">`).join('');
+  renderMapelChk();
+}
+$('sv_mapel').onclick = async () => {
+  const nama = $('m_nama').value.trim(); if (!nama) return;
+  if (S.mapel.some(m => m.nama.toLowerCase() === nama.toLowerCase())) return info('Mata pelajaran sudah ada', true);
+  const n = [...S.mapel, {id:uid(), nama}];
+  if (await save('Mapel', n)) { S.mapel = n; $('m_nama').value = ''; renderMapel(); }
+};
+window.delMapel = async id => { const n = S.mapel.filter(m => m.id !== id); if (await save('Mapel', n)) { S.mapel = n; renderMapel(); } };
+
+/* ---------- Supervisi ---------- */
+function renderInstr(skor = {}) {
+  $('instr').innerHTML = Object.entries(INSTR).map(([k, s]) => `<div class="card"><h3>${s.t}</h3><div class="tw"><table><tbody>${s.q.map((q, i) => `<tr><td>${i + 1}. ${q}</td><td><div class="sc">${[1,2,3,4].map(n => `<label><input type="radio" name="${k}${i}" value="${n}" ${(skor[k] || [])[i] == n ? 'checked' : ''}>${n}</label>`).join('')}</div></td></tr>`).join('')}</tbody></table></div></div>`).join('');
+  hitung();
+}
+function ambilSkor() {
+  const o = {}; let tot = 0, n = 0;
+  Object.entries(INSTR).forEach(([k, s]) => { o[k] = s.q.map((_, i) => { const r = document.querySelector(`input[name="${k}${i}"]:checked`); n++; if (r) { tot += +r.value; return +r.value; } return 0; }); });
+  return {o, nilai:n ? Math.round(tot / (n * 4) * 1000) / 10 : 0};
+}
+const predikat = n => n >= 90 ? 'Amat baik' : n >= 80 ? 'Baik' : n >= 70 ? 'Cukup' : 'Perlu pembinaan';
+function hitung() { const {nilai} = ambilSkor(); $('nilai').textContent = nilai; $('pred').textContent = nilai ? predikat(nilai) : '-'; }
+$('instr').onchange = hitung;
+$('v_guru').onchange = () => { const g = S.guru.find(x => x.id === $('v_guru').value); if (g && g.mapel && !$('v_mapel').value) $('v_mapel').value = g.mapel.split('; ')[0]; };
+function resetSup() {
+  editV = null; $('sh').textContent = 'Supervisi baru'; ['v_guru','v_kelas','v_mapel','v_catatan','v_tindak'].forEach(i => $(i).value = '');
+  $('v_tanggal').value = new Date().toISOString().slice(0, 10); renderInstr();
+}
+$('cl_sup').onclick = resetSup;
+$('sv_sup').onclick = async () => {
+  const g = S.guru.find(x => x.id === $('v_guru').value); if (!g) return info('Pilih guru yang disupervisi', true);
+  const {o, nilai} = ambilSkor();
+  if (Object.values(o).some(a => a.includes(0))) return info('Masih ada butir yang belum dinilai', true);
+  const rec = {id:editV || uid(), tanggal:$('v_tanggal').value, guruId:g.id, guruNama:g.nama, mapel:$('v_mapel').value.trim(), kelas:$('v_kelas').value.trim(),
+    ta:S.sekolah.ta || '', semester:S.sekolah.semester || '', nilai, predikat:predikat(nilai), skor:JSON.stringify(o), catatan:$('v_catatan').value.trim(), tindak:$('v_tindak').value.trim()};
+  const n = editV ? S.supervisi.map(v => v.id === editV ? rec : v) : [...S.supervisi, rec];
+  if (await save('Supervisi', n)) { S.supervisi = n; renderRiwayat(); resetSup(); info('Supervisi tersimpan. Lihat di Riwayat dan cetak.'); }
+};
+function renderRiwayat() {
+  $('rb').innerHTML = [...S.supervisi].reverse().map(v => `<tr><td>${esc(v.tanggal)}</td><td>${esc(v.guruNama)}</td><td>${esc(v.kelas)} / ${esc(v.mapel)}</td><td>${esc(v.nilai)}</td><td>${esc(v.predikat)}</td><td><button class="sec" onclick="cetak('${v.id}')">Cetak</button> <button class="sec" onclick="editSup('${v.id}')">Edit</button> <button class="del" onclick="delSup('${v.id}')">Hapus</button></td></tr>`).join('') || '<tr><td colspan="6" class="note">Belum ada supervisi.</td></tr>';
+}
+window.editSup = id => {
+  const v = S.supervisi.find(x => x.id === id); editV = id; $('sh').textContent = 'Edit supervisi';
+  $('v_guru').value = v.guruId; $('v_tanggal').value = v.tanggal; $('v_kelas').value = v.kelas; $('v_mapel').value = v.mapel; $('v_catatan').value = v.catatan; $('v_tindak').value = v.tindak;
+  let sk = {}; try { sk = JSON.parse(v.skor) } catch (e) {} renderInstr(sk);
+  document.querySelector('[data-t=sup]').click(); window.scrollTo(0, 0);
+};
+window.delSup = async id => { if (!confirm('Hapus data supervisi ini?')) return; const n = S.supervisi.filter(v => v.id !== id); if (await save('Supervisi', n)) { S.supervisi = n; renderRiwayat(); } };
+window.cetak = id => {
+  const v = S.supervisi.find(x => x.id === id), s = S.sekolah, g = S.guru.find(x => x.id === v.guruId) || {};
+  let sk = {}; try { sk = JSON.parse(v.skor) } catch (e) {}
+  $('cetak').innerHTML = `<div class="kop">${s.logo ? `<img src="${s.logo}" alt="">` : ''}<div><b>${esc(s.jenjang)} ${esc(s.nama)}</b><br>NPSN ${esc(s.npsn)}<br>${esc(s.alamat)}</div></div>
+  <h3 style="text-align:center">LAPORAN SUPERVISI GURU</h3>
+  <table style="margin-bottom:1rem"><tr><td>Nama guru</td><td>: ${esc(v.guruNama)}</td><td>Tanggal</td><td>: ${esc(v.tanggal)}</td></tr>
+  <tr><td>NIP</td><td>: ${esc(g.nip) || '-'}</td><td>Tahun ajaran</td><td>: ${esc(v.ta)} (${esc(v.semester)})</td></tr>
+  <tr><td>Tugas</td><td>: ${esc(g.tugas)}</td><td>Kelas / mapel</td><td>: ${esc(v.kelas)} / ${esc(v.mapel)}</td></tr></table>
+  <table border="1" style="border-collapse:collapse"><thead><tr><th>No</th><th>Butir supervisi</th><th>Skor (1-4)</th></tr></thead><tbody>
+  ${Object.entries(INSTR).map(([k, x]) => `<tr><th colspan="3">${x.t}</th></tr>` + x.q.map((q, i) => `<tr><td>${i + 1}</td><td>${q}</td><td style="text-align:center">${(sk[k] || [])[i] || '-'}</td></tr>`).join('')).join('')}
+  </tbody></table>
+  <p><b>Nilai akhir: ${esc(v.nilai)} (${esc(v.predikat)})</b></p>
+  <p><b>Catatan:</b> ${esc(v.catatan) || '-'}</p><p><b>Tindak lanjut:</b> ${esc(v.tindak) || '-'}</p>
+  <div class="ttd"><div>Guru yang disupervisi<br><br><br><br><u>${esc(v.guruNama)}</u><br>NIP. ${esc(g.nip) || '-'}</div><div>Kepala sekolah<br><br><br><br><u>${esc(s.kepsek)}</u><br>NIP. ${esc(s.nipKepsek) || '-'}</div></div>`;
+  window.print();
+};
+
+function renderAll() { renderSekolah(); renderMapel(); renderGuru(); renderRiwayat(); resetSup(); }
+</script>
+</body>
+</html>
